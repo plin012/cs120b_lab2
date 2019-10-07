@@ -20,28 +20,38 @@ unsigned char GetBit(unsigned char bitString, unsigned char index){
 int main(void) {
     /* Insert DDR and PORT initializations */
 	DDRA = 0x00;	PORTA = 0xFF; //set port A as 8 bits input
-	DDRB = 0x00;	PORTB = 0xFF; //set port B as 8 bits input
-	DDRC = 0xFF;	PORTC = 0x00; //set port C as 8 bits output
+	//DDRB = 0x00;	PORTB = 0xFF; //set port B as 8 bits input
+	DDRB = 0xFF;	PORTB = 0x00; //set port B as 8 bits output
     /* Insert your solution below */
 	unsigned char tempC = 0x00; //initial c as 0
 	//unsigned char count = 0x00;
     while (1) {
-	unsigned char count = 0x00;
-	unsigned char iter; // iterator for the for loop
-	for(iter = 0; iter < 8; iter++){
-		//for portA
-		tempC = PINA;
-		if(GetBit(tempC,iter)){
-			count++;	
-		}
-		//for portB
-		tempC = PINB;
-		if(GetBit(tempC,iter)){
-			count++;
-		}	
+	tempC = PINA;
+	if (tempC == 0){
+		PORTB = 0x00;
 	}
-	PORTC = count;
+	else if(tempC == 1 || tempC == 2){
+		PORTB =  0x20;
+	}
+	else if (tempC == 3 || tempC == 4){
+		PORTB = 0x30;
+	}
+	else if (tempC == 5 || tempC == 6){
+		PORTB = 0x38;
+	}
+	else if (tempC == 7 || tempC == 8 || tempC == 9){
+		PORTB = 0x3C;
+	}
+	else if (tempC == 10 || tempC == 11 || tempC ==12){
+		PORTB = 0x3E;
+	}
+	else if (tempC == 13 || tempC == 14 || tempC == 15){
+		PORTB = 0x3F;
+	}
 	
+	if(tempC <= 4){
+		PORTB = (tempC | 0x40);
+	}
     }
     return 1;
 }
