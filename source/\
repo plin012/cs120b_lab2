@@ -24,11 +24,10 @@ int main(void) {
 	DDRC = 0xFF;	PORTC = 0x00; //set port C as 8 bits output
     /* Insert your solution below */
 	unsigned char tempC = 0x00; //initial c as 0
-	//unsigned char count = 0x00;
     while (1) {
-	unsigned char count = 0x00;
+	unsigned char count = 0x00; // initial bit count to 0
 	unsigned char iter; // iterator for the for loop
-	for(iter = 0; iter < 8; iter++){
+	for(iter = 0; iter < 0; iter++){
 		//for portA
 		tempC = PINA;
 		if(GetBit(tempC,iter)){
@@ -40,8 +39,8 @@ int main(void) {
 			count++;
 		}	
 	}
-	PORTC = count;
+	return PORTC = count;
 	
     }
-    return 1;
+    return 0;
 }
