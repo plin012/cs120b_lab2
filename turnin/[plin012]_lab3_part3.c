@@ -20,52 +20,27 @@ unsigned char GetBit(unsigned char bitString, unsigned char index){
 int main(void) {
     /* Insert DDR and PORT initializations */
 	DDRA = 0x00;	PORTA = 0xFF; //set port A as 8 bits input
-	//DDRB = 0x00;	PORTB = 0xFF; //set port B as 8 bits input
-	DDRB = 0xFF;	PORTB = 0x00; //set port B as 8 bits output
+	DDRB = 0x00;	PORTB = 0xFF; //set port B as 8 bits output
+	DDRC = 0xFF;	PORTB = 0x00; //set port C as 8 bits output
     /* Insert your solution below */
-	unsigned char tempC = 0x00; //initial c as 0
-	unsigned char tempA = 0x00;
+	unsigned char tempA = 0x00; //initial c as 0
 	unsigned char tempB = 0x00;
+	unsigned char tempC = 0x00; //airbag
 	//unsigned char count = 0x00;
     while (1) {
-	tempC = PINA & 0x0F ; //ignore the PA4 to PA6
-	tempA = PINA & 0x70 ; //ignore PA7 & PA3 to PA0
-	tempB = 0x00;
-	
-	if (tempC == 0){
-		tempB = 0x00;
+	tempC == 0x00;
+	tempA = PINA;
+	tempB = PINB & 0x01;
+	if((tempA >= 70 && tempB == 0) || (tempA >= 69 && tempB == 1)){
+		tempC = 0x02;	
 	}
-	else if(tempC == 1 || tempC == 2){
-		tempB =  0x20;
+	else if ((tempA > 5 && tempB == 0) || (tempA > 4 && tempB == 1)){
+		tempC = 0x04;
 	}
-	else if (tempC == 3 || tempC == 4){
-		tempB = 0x30;
+	else{
+		tempC = 0x00;
 	}
-	else if (tempC == 5 || tempC == 6){
-		tempB = 0x38;
-	}
-	else if (tempC == 7 || tempC == 8 || tempC == 9){
-		tempB = 0x3C;
-	}
-	else if (tempC == 10 || tempC == 11 || tempC ==12){
-		tempB = 0x3E;
-	}
-	else if (tempC == 13 || tempC == 14 || tempC == 15){
-		tempB = 0x3F;
-	}
-	
-	if(tempC <= 4){
-		tempB = (tempB | 0x40);
-	}
-
-	tempA = tempA >> 4;
-	if(tempA == 3){
-		tempB = (tempB | 0x80); 
-		
-	}
-
-	PORTB = tempB;
-
+	PORTC = tempB | tempC;
     }
     return 1;
 }
