@@ -24,34 +24,36 @@ int main(void) {
 	DDRB = 0xFF;	PORTB = 0x00; //set port B as 8 bits output
     /* Insert your solution below */
 	unsigned char tempC = 0x00; //initial c as 0
+	unsigned char tempB = 0x00;
 	//unsigned char count = 0x00;
     while (1) {
 	tempC = PINA;
 	if (tempC == 0){
-		PORTB = 0x00;
+		tempB = 0x00;
 	}
 	else if(tempC == 1 || tempC == 2){
-		PORTB =  0x20;
+		tempB =  0x20;
 	}
 	else if (tempC == 3 || tempC == 4){
-		PORTB = 0x30;
+		tempB = 0x30;
 	}
 	else if (tempC == 5 || tempC == 6){
-		PORTB = 0x38;
+		tempB = 0x38;
 	}
 	else if (tempC == 7 || tempC == 8 || tempC == 9){
-		PORTB = 0x3C;
+		tempB = 0x3C;
 	}
 	else if (tempC == 10 || tempC == 11 || tempC ==12){
-		PORTB = 0x3E;
+		tempB = 0x3E;
 	}
 	else if (tempC == 13 || tempC == 14 || tempC == 15){
-		PORTB = 0x3F;
+		tempB = 0x3F;
 	}
 	
 	if(tempC <= 4){
-		PORTB = (tempC | 0x40);
+		tempB = (tempB | 0x40);
 	}
+	PORTB = tempB;
     }
     return 1;
 }
