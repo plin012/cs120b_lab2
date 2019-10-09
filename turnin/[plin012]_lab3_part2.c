@@ -28,10 +28,9 @@ int main(void) {
 	//unsigned char count = 0x00;
     while (1) {
 	tempC = PINA;
-	if (tempC == 0){
-		tempB = 0x00;
-	}
-	else if(tempC == 1 || tempC == 2){
+	tempB = 0x00;
+	
+	 if(tempC == 1 || tempC == 2){
 		tempB =  0x20;
 	}
 	else if (tempC == 3 || tempC == 4){
@@ -48,6 +47,9 @@ int main(void) {
 	}
 	else if (tempC == 13 || tempC == 14 || tempC == 15){
 		tempB = 0x3F;
+	}
+	else{
+		tempB = 0;
 	}
 	
 	if(tempC <= 4){

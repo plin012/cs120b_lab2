@@ -29,7 +29,8 @@ int main(void) {
 	//unsigned char count = 0x00;
     while (1) {
 	tempC = PINA & 0x0F ; //ignore the PA4 to PA6
-	tempA = PINA;
+	tempA = PINA & 0x70 ; //ignore PA7 & PA3 to PA0
+	tempB = 0x00;
 	
 	if (tempC == 0){
 		tempB = 0x00;
@@ -53,12 +54,13 @@ int main(void) {
 		tempB = 0x3F;
 	}
 	
-	if(tempB <= 4){
+	if(tempC <= 4){
 		tempB = (tempB | 0x40);
 	}
 
-	if(GetBit(tempA,4)&& GetBit(tempA,5) && !GetBit(tempA,6)){
-		tempB = (tempB | 0x60); 
+	tempA = tempA >> 4;
+	if(tempA == 3){
+		tempB = (tempB | 0x80); 
 		
 	}
 
