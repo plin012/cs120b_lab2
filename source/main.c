@@ -28,7 +28,8 @@ void lock_state(){
 	buttonY = PINA & 0x02;
 	buttonP = PINA & 0x04;
 	buttonLock = PINA & 0x80;
-
+	tempB = 0x00;
+	tempC = 0x00;
 	switch(state){
 		case lock:
 			if(buttonLock){
