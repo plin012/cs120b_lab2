@@ -13,84 +13,104 @@
 #include "simAVRHeader.h"
 #endif
 
-enum States{lock, wait, release, unlock} state;
+enum States{init, inc, dec, zero, wait, wait2} state;
 
-unsigned char buttonX;
-unsigned char buttonY;
-unsigned char buttonP;
-unsigned char buttonLock;
+unsigned char buttonInc;
+unsigned char buttonDec;
 
-unsigned char tempB;
 unsigned char tempC;
 
-void lock_state(){
-	buttonX = PINA & 0x01;
-	buttonY = PINA & 0x02;
-	buttonP = PINA & 0x04;
-	buttonLock = PINA & 0x80;
-	tempB = 0x00;
-	tempC = 0x00;
+void number_state(){
+	buttonInc = PINA & 0x01;
+	buttonDec = PINA & 0x02;
+
 	switch(state){
-		case lock:
-			if(buttonLock){
-				state = lock;
+		case init:
+			if(!buttonInc && !buttonDec){
+				state = init;
 			}
-			if(!buttonX && !buttonY && buttonP && !buttonLock){
-				state = wait;
+			else if(buttonInc && !buttonDec){
+				state = inc;
+			}
+			else if (!buttonInc && buttonDec){
+				state = dec;
+			}
+			else if (buttonInc && buttonDec){
+				state = zero;
+			}
+			break;
+		case inc:
+			if(buttonInc && buttonDec){
+				state = zero;
 			}
 			else{
-				state = lock;
+				state = wait2;
+			}
+			break;
+		case dec:
+			if(buttonInc && buttonDec){
+				state = zero;
+			}
+			else{
+				state = wait2;
+			}
+			break;
+		case zero:
+			if(!buttonInc && !buttonDec){
+				state = init;
+			}
+			else if(buttonInc && buttonDec){
+				state = inc;
+			}
+			else if(!buttonInc && buttonDec){
+				state = dec;
+			}
+			else if(buttonInc && buttonDec){
+				state = zero;
 			}
 			break;
 		case wait:
-			if(!buttonX && !buttonY && buttonP && !buttonLock){
+			if(buttonInc && buttonDec){
+				state = zero;
+			}
+			else if(buttonInc && !buttonDec){
+				state = inc;
+			}
+			else if(!buttonInc && buttonDec){
+				state = dec;
+			}
+			else{
 				state = wait;
 			}
-			else if(!buttonX && !buttonY && !buttonP && !buttonLock){
-				state = release;
+			break;
+		case wait2:
+			if(!buttonInc && !buttonDec){
+				state = wait;
+			}
+			else if(buttonInc && buttonDec){
+				state = zero;
 			}
 			else{
-				state = lock;
+				state = wait2;
 			}
 			break;
-		case release:
-			if(!buttonX && !buttonY && !buttonP && !buttonLock){
-				state = release;
-			}
-			else if(!buttonX && buttonY && !buttonP && !buttonLock){
-				state = unlock;
-			}
-			else{
-				state = lock;
-			}
-			break;
-		case unlock:
-			if(!buttonX && !buttonY && !buttonP && buttonLock){
-				state = lock;
-			}
-			else{
-				state = unlock;
-			}
-			break;
-			
-			
-	}
+		}
 	switch(state){
-		case lock:
-			tempB = 0x00;
-			tempC = 0x00;
+		case init:
 			break;
-		case wait:
-			tempC = 0x01;
+		case inc:
+			if(tempC < 9){
+				tempC = tempC +1;
+			}
 			break;
-		case release:
-			tempC = 0x02;
+		case dec:
+			if(tempC > 0){
+				tempC = tempC -1;
+			}
 			break;
-		case unlock:
-			tempB = 0x01;
-			tempC = 0x03;
+		case zero:
+			tempC = 0;
 			break;
-		
 		}
 				
 }
@@ -98,12 +118,12 @@ void lock_state(){
 int main(void) {
     /* Insert DDR and PORT initializations */
 	DDRA = 0x00;	PORTA = 0xFF; //set port A as 8 bits input
-	DDRB = 0xFF;	PORTB = 0x00; //set port B as 8 bits output
-	DDRC = 0xFF;	PORTC = 0x00; //set port C as 8 bits output
-	state = lock;
+	DDRC = 0xFF;	PORTC = 0x00; //set port B as 8 bits output
+	//DDRC = 0xFF;	PORTB = 0x00; //set port C as 8 bits output
+	state = init;
+	tempC = 0x07;
     while (1) {
-	lock_state();
-	PORTB = tempB;
+	number_state();
 	PORTC = tempC;
 		
     }
