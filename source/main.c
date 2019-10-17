@@ -85,17 +85,18 @@ unsigned char lightIndex(unsigned char currentIndex){
 			prevIndex = 0x3E;
 			break;
 	}
+	return nextIndex;
 }
 
 void light_state(){
-	tempA = ~PINA & 0x01;
+	tempA = PINA & 0x01;
 	switch(state){
 		case init:
 			state = wait;
 			break;
 		case wait:
 			if(tempA){
-				state = buttonPress;
+				state = next;;
 			}
 			else{
 				state = wait;
@@ -133,6 +134,7 @@ int main(void) {
 	DDRB = 0xFF;	PORTB = 0x00; //set port B as 8 bits output
 	//DDRC = 0xFF;	PORTC = 0x00; //set port C as 8 bits output
 	state = init;
+	tempB = 0x00;
     while (1) {
 	light_state();
 	PORTB = tempB;
