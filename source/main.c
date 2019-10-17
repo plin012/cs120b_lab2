@@ -17,10 +17,13 @@ enum States{init, wait, next,buttonPress}state;
 
 unsigned char tempA = 0x00;
 unsigned char tempB = 0x00;
+unsigned char nextIndex = 0x00;
+unsigned char prevIndex = 0x00;
+
 
 unsigned char lightIndex(unsigned char currentIndex){
-	unsigned char nextIndex = 0x00;
-	unsigned char prevIndex = 0x00;
+	//unsigned char nextIndex = 0x00;
+	//unsigned char prevIndex = 0x00;
 	switch(currentIndex){
 		case 0x00:
 			if(prevIndex == 0x00){
@@ -89,10 +92,13 @@ unsigned char lightIndex(unsigned char currentIndex){
 }
 
 void light_state(){
-	tempA = PINA & 0x01;
+	tempA = ~PINA & 0x01;
 	switch(state){
 		case init:
 			state = wait;
+			tempB = 0x00;
+			nextIndex = 0x00;
+			prevIndex = 0x00;
 			break;
 		case wait:
 			if(tempA){
@@ -134,7 +140,10 @@ int main(void) {
 	DDRB = 0xFF;	PORTB = 0x00; //set port B as 8 bits output
 	//DDRC = 0xFF;	PORTC = 0x00; //set port C as 8 bits output
 	state = init;
+	tempA = 0x00;
 	tempB = 0x00;
+	prevIndex = 0x00;
+	nextIndex = 0x00;
     while (1) {
 	light_state();
 	PORTB = tempB;
