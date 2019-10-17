@@ -13,85 +13,110 @@
 #include "simAVRHeader.h"
 #endif
 
-enum States{lock, wait, release, unlock} state;
+enum States{init, wait, buttonPress}state;
 
-unsigned char buttonX;
-unsigned char buttonY;
-unsigned char buttonP;
-unsigned char buttonLock;
+unsigned char tempA = 0x00;
+unsigned char tempB = 0x00;
 
-unsigned char tempB;
-unsigned char tempC;
-
-void lock_state(){
-	buttonX = PINA & 0x01;
-	buttonY = PINA & 0x02;
-	buttonP = PINA & 0x04;
-	buttonLock = PINA & 0x80;
-	tempB = 0x00;
-	tempC = 0x00;
-	switch(state){
-		case lock:
-			if(buttonLock){
-				state = lock;
-			}
-			if(!buttonX && !buttonY && buttonP && !buttonLock){
-				state = wait;
+unsigned char lightIndex(unsigned char currentIndex){
+	unsigned char nextIndex = 0x00;
+	unsigned cahr prevIndex = 0x00;
+	switch(currentIndex){
+		case 0x00:
+			if(prevIndex == 0x00){
+				nextIndex = 0x01;
+				prevIndex = 0x00;
+				break;
 			}
 			else{
-				state = lock;
+				nextIndex = 0x20;
+				prevIndex = 0x00;
+				break;
 			}
+		case 0x01:
+			nextIndex = 0x03;
+			prevIndex = 0x01;
+			break;
+		case 0x03:
+			nextIndex = 0x07;
+			prevIndex = 0x03;
+			break;
+		case 0x07:
+			nextIndex = 0x0F;
+			prevIndex = 0x07;
+			break;
+		case 0x0F:
+			nextIndex = 0x1F;
+			prevIndex = 0x0F;
+			break;
+		case 0x1F:
+			nextIndex = 0x3F;
+			prevIndex = 0x1F;
+			break;
+		case 0x3F:
+			if(prevIndex != 0x3C{
+				nextIndex = 0x00;
+				prevIndex = 0x3F;
+				break;
+			}
+			else{
+				nextIndex = 0x00;
+				prevIndex = 0x00;
+				break;
+			}
+		case 0x20:
+			nextIndex = 0x30;
+			prevIndex = 0x20;	
+			break;
+		case 0x30:
+			nextIndex = 0x38;
+			prevIndex = 0x30;
+			break;
+		case 0x38:
+			nextIndex = 0x3C;
+			prevIndex = 0x38;
+			break;
+		case 0x3C:
+			nextIndex = 0x3E;
+			prevIndex = 0x3C;
+			break;
+		case 0x3E:
+			nextindex = 0x3F;
+			prevIndex = 0x3E;
+			break;
+
+void light_state(){
+	tempA = PINA & 0x01;
+	switch(state){
+		case init:
+			state = wait;
 			break;
 		case wait:
-			if(!buttonX && !buttonY && buttonP && !buttonLock){
+			if(tempA){
+				state = next;
+			}
+			else{
 				state = wait;
 			}
-			else if(!buttonX && !buttonY && !buttonP && !buttonLock){
-				state = release;
+			break;
+		case buttonPress:
+			if(tempA){
+				state = buttonPress;
 			}
 			else{
-				state = lock;
+				state = wait;
 			}
 			break;
-		case release:
-			if(!buttonX && !buttonY && !buttonP && !buttonLock){
-				state = release;
-			}
-			else if(!buttonX && buttonY && !buttonP && !buttonLock){
-				state = unlock;
-			}
-			else{
-				state = lock;
-			}
-			break;
-		case unlock:
-			if(!buttonX && !buttonY && !buttonP && buttonLock){
-				state = lock;
-			}
-			else{
-				state = unlock;
-			}
-			break;
-			
-			
 	}
 	switch(state){
-		case lock:
-			tempB = 0x00;
-			tempC = 0x00;
+		case init:
 			break;
 		case wait:
-			tempC = 0x01;
 			break;
-		case release:
-			tempC = 0x02;
+		case buttonPress:
+			tempB = lightIndex(tempB);
 			break;
-		case unlock:
-			tempB = 0x01;
-			tempC = 0x03;
-			break;
-		
-		}
+	}
 				
 }
 
@@ -99,12 +124,11 @@ int main(void) {
     /* Insert DDR and PORT initializations */
 	DDRA = 0x00;	PORTA = 0xFF; //set port A as 8 bits input
 	DDRB = 0xFF;	PORTB = 0x00; //set port B as 8 bits output
-	DDRC = 0xFF;	PORTC = 0x00; //set port C as 8 bits output
-	state = lock;
+	//DDRC = 0xFF;	PORTC = 0x00; //set port C as 8 bits output
+	state = init;;
     while (1) {
-	lock_state();
+	light_state();
 	PORTB = tempB;
-	PORTC = tempC;
 		
     }
     return 1;
