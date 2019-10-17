@@ -13,14 +13,14 @@
 #include "simAVRHeader.h"
 #endif
 
-enum States{init, wait, buttonPress}state;
+enum States{init, wait, next,buttonPress}state;
 
 unsigned char tempA = 0x00;
 unsigned char tempB = 0x00;
 
 unsigned char lightIndex(unsigned char currentIndex){
 	unsigned char nextIndex = 0x00;
-	unsigned cahr prevIndex = 0x00;
+	unsigned char prevIndex = 0x00;
 	switch(currentIndex){
 		case 0x00:
 			if(prevIndex == 0x00){
@@ -54,7 +54,7 @@ unsigned char lightIndex(unsigned char currentIndex){
 			prevIndex = 0x1F;
 			break;
 		case 0x3F:
-			if(prevIndex != 0x3C{
+			if(prevIndex != 0x3C){
 				nextIndex = 0x00;
 				prevIndex = 0x3F;
 				break;
@@ -81,23 +81,28 @@ unsigned char lightIndex(unsigned char currentIndex){
 			prevIndex = 0x3C;
 			break;
 		case 0x3E:
-			nextindex = 0x3F;
+			nextIndex = 0x3F;
 			prevIndex = 0x3E;
 			break;
+	}
+}
 
 void light_state(){
-	tempA = PINA & 0x01;
+	tempA = ~PINA & 0x01;
 	switch(state){
 		case init:
 			state = wait;
 			break;
 		case wait:
 			if(tempA){
-				state = next;
+				state = buttonPress;
 			}
 			else{
 				state = wait;
 			}
+			break;
+		case next:
+			state = buttonPress;
 			break;
 		case buttonPress:
 			if(tempA){
@@ -113,8 +118,10 @@ void light_state(){
 			break;
 		case wait:
 			break;
-		case buttonPress:
+		case next:
 			tempB = lightIndex(tempB);
+			break;
+		case buttonPress:
 			break;
 	}
 				
@@ -125,7 +132,7 @@ int main(void) {
 	DDRA = 0x00;	PORTA = 0xFF; //set port A as 8 bits input
 	DDRB = 0xFF;	PORTB = 0x00; //set port B as 8 bits output
 	//DDRC = 0xFF;	PORTC = 0x00; //set port C as 8 bits output
-	state = init;;
+	state = init;
     while (1) {
 	light_state();
 	PORTB = tempB;
