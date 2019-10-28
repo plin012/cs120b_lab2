@@ -17,9 +17,6 @@ unsigned long _avr_timer_M = 1;
 unsigned long _avr_timer_cntcurr = 0;
 unsigned char tempA = 0x00;
 unsigned char tempC = 0x00;
-unsigned char records = 0x00;
-
-
 
 void TimerOn(){
 	TCCR1B = 0x0B;
@@ -51,89 +48,79 @@ void TimerSet(unsigned long M){
 	_avr_timer_cntcurr = _avr_timer_M;
 }
 
-enum States {on1, chill1, on2, chill2, on3, chill3} state;
+enum States {wait, inc, dec, zero} state;
+
+unsigned char button0;;
+unsigned char button1;
+
+unsigned char tempC;
 
 void lcd_state(){
+	button0 = ~PINA & 0x01;
+	button1 = ~PINA & 0x02;
 	
 	switch(state){
-		case on1:
-			if(tempC){
-				state = chill1;
-				if(records > 0){
-					records = records -1;
-				}
+		case zero:
+			if(button0 && button1){
+				state = zero;
 			}
 			else{
-				state = on2;
+				state = wait;
 			}
 			break;
-		case chill1:
-			if(tempC){
-				state = on1;
+		case wait:
+			if(button0 && !button1){
+				state = inc;
+			}
+			else if(!button0 && button1){
+				state = dec;
+			}
+			else if(button0 && button1){
+				state = zero;
 			}
 			else{
-				state = chill1;
-			}
-		case on2:
-			if(tempC){
-				state = chill2;
-				if(score < 9){
-					records = records + 1;
-				}
-			}
-			else{
-				state = on3;
+				state = wait;
 			}
 			break;
-		case chill2:
-			if(tempC){
-				state = on2;
+		case inc:
+			if(button0 && !button1){
+				state = inc; 
 			}
-			else{
-				state = chill2;
+			else if(button0 && button1){
+				state = zero;
 			}
+			else
+				state = wait;
 			break;
-		case on3:
-			if(tempC){
-				state = chill3;
-				if(score > 0){
-					records = records -1;
-				}
+		case dec:
+			if(!button0 && button1){
+				state = dec;
 			}
-			else{
-				state = on1;
+			else if(button0 && button1){
+				state = zero;
 			}
-			break;
-		case chill3:
-			if(tempC){
-				state = on3;
-			}
-			else{
-				state = chill3;
-			}
+			else
+				state = wait;
+			
 			break;
 	}
 	switch(state){
-		case on1:
-			tempA = 0x01;
+		case zero:
+			tempC = 0;
 			break;
-		case chill1:
-			tempA = 0x01;
+		case wait:
 			break;
-		case on2:
-			tempA = 0x02;
+		case inc:
+			if(tempC < 9){
+				tempC = tempC + 1;
+			}
 			break;
-		case chill2:
-			tempA = 0x02;
-			break;
-		case on3:
-			tempA = 0x04;
-			break;
-		case chill3:
-			tempA = 0x04;
+		case dec:
+			if(tempC > 0){
+				tempC = tempC - 1;
+			}
 			break;
 	}
-			
 }
 
 
@@ -148,28 +135,15 @@ int main(void) {
 	
 	LCD_init();
 	LCD_ClearScreen();
-
-	records = 0x05;
-	state = light1;
-
+	
+	state = wait;
+	tempC = 0x00;
 	while(1){
 		LCD_Cursor(1);
-		if(records == 9){
-			LCD_DisplayString(1, "You Win!!");
-		}
-		else{
-			LCD_WriteData(records + '0');
-		}
-		tempC = ~PINA & 0x01;
-
 		lcd_state();
-
+		LCD_WriteData(tempC + '0');
 		while(!TimerFlag){}
 		TimerFlag = 0;
-
-		PORTB = tempA;
-	}
-	return 0;
 
 }
 
