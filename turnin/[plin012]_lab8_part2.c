@@ -21,42 +21,13 @@ int main(void) {
 	DDRB = 0xFF;	PORTB = 0x00; //set port C as 8 bits output
 
 
-	ADC_init();
-	unsigned short max = 816;
-	unsigned char tempB = 0x00;		
+	ADC_init();		
 	while(1){
-		unsigned short adc_Value = ADC;
-		
-		if( adc_Value <= 0){
-			tempB = 0x80;
-		}		
-		else if (adc_Value <= max * .125){
-			tempB = 0x40;
-		}
-		else if( adc_Value <= max * .25){
-			tempB = 0x20;
-		}
-		else if( adc_Value <= max * .375){
-			tempB = 0x10;
-		}
-		else if( adc_Value <= max * .50){
-			tempB = 0x08;
-		}
-		else if( adc_Value <= max * .625){
-			tempB = 0x04;
-		}
-		else if( adc_Value <= max * .75){
-			tempB = 0x02;
-		}
-		else if( adc_Value <= max * .875){
-			tempB = 0x01;
-		}
-		else if( adc_Value <= max ){
-			tempB = 0x00;
-		}
-
-
-		PORTB = tempB;
+		unsigned short adc_Value = ~ADC;
+		unsigned char first8 = (char)adc_Value;
+		PORTB = first8;
+		unsigned char last2 = (char)(adc_Value >> 8);
+		PORTD = last2;	
 
 
 	}
