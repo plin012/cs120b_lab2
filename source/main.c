@@ -8,7 +8,7 @@
  *	code, is my own original work.
  */
 #include <avr/io.h>
-#incllude <avr/interrupt.h>
+#include <avr/interrupt.h>
 
 void ADC_init(){
 	ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADATE);
@@ -22,40 +22,20 @@ int main(void) {
 
 
 	ADC_init();
-	unsigned short max = 816;
+	unsigned short max = 800;
 	unsigned char tempB = 0x00;		
 	while(1){
 		unsigned short adc_Value = ADC;
-		
-		if( adc_Value <= 0){
-			tempB = 0x80;
-		}		
-		else if (adc_Value <= max * .125){
-			tempB = 0x40;
+		if(adc_Value > max){
+			max = adc_Value;
 		}
-		else if( adc_Value <= max * .25){
-			tempB = 0x20;
-		}
-		else if( adc_Value <= max * .375){
-			tempB = 0x10;
-		}
-		else if( adc_Value <= max * .50){
-			tempB = 0x08;
-		}
-		else if( adc_Value <= max * .625){
-			tempB = 0x04;
-		}
-		else if( adc_Value <= max * .75){
-			tempB = 0x02;
-		}
-		else if( adc_Value <= max * .875){
-			tempB = 0x01;
-		}
-		else if( adc_Value <= max ){
+		if(adc_Value >= max/2){
 			tempB = 0x00;
 		}
-
-
+		else{
+			tempB = 0x01;
+		}
+		
 		PORTB = tempB;
 
 
