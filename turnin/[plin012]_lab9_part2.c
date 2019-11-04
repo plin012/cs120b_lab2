@@ -13,26 +13,26 @@
 void set_PWM(double frequency){
 	static double current_frequency;
 	if(frequency != current_frequency){
-		if(!frequency){TCCR0B &= 0x08;}
+		if(!frequency){TCCR3B &= 0x08;}
 		else{TCCR0B |= 0x03;}
-		if(frequency < 0.954){OCR0A = 0xFFFF;}
+		if(frequency < 0.954){OCR3A = 0xFFFF;}
 		
-		else if(frequency > 31250){ OCR0A = 0x0000;}
-		else{OCR0A = (short)(8000000/(128*frequency))-1;}
-		TCNT0 = 0;
+		else if(frequency > 31250){ OCR3A = 0x0000;}
+		else{OCR3A = (short)(8000000/(128*frequency))-1;}
+		TCNT3 = 0;
 		current_frequency  = frequency;
 	}
 }
 
 void PWM_on(){
-	TCCR0A = (1 << COM0A0 | 1 << WGM00);
-	TCCR0B = (1 << COM0A2) | (1 << CS01) | (1 << CS00);
+	TCCR3A = (1 << COM3A0);
+	TCCR3B = (1 << WGM32) | (1 << CS31) | (1 << CS30);
 	set_PWM(0);
 }
 
 void PWM_off(){
-	TCCR0A = 0x00;
-	TCCR0B = 0x00;
+	TCCR3A = 0x00;
+	TCCR3B = 0x00;
 }
 
 enum States{off, tOff, on, cOn, up, wUp, down, wDown}state;
@@ -41,49 +41,60 @@ unsigned char buttonP = 0x00;
 
 const double notes[8] = {261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25};
 
-unsigned char i = 0x00;
+unsigned char i = 0x04;
 
 void sound_state(){
 	buttonP = ~PINA & 0x07;
 	switch(state){
 		case off:
-			if(buttonP == 1)
+			if(buttonP == 0x01){
 				state = on;
-			else 
+			}
+			else{ 
 				state = off;
+			}
 			break;
 		case tOff:
-			if(!(buttonPress == 1))
-				state = off;
-			else
+			if(buttonP == 0x01){
 				state = tOff;
+			}
+			else{
+				state = off;
+			}		
 		case on:
-			if(buttonP == 1)
+			if(buttonP == 0x01){
 				state = on;
-			else
+			}
+			else{
 				state = cOn;
+			}
 			break;
 		case cOn:
-			if(buttonPress == 2){
-				if(i<7)
+			if(buttonP == 0x02){
+				if(i>0){
 					i--;
+				}
 				state = down;
+				
 			}
-			eles if(buttonP == 4){
-				if(i>0)
-					i--;
-				state = down;
+			else if(buttonP == 0x04){
+				if(i<7){
+					i++;
+				}
+				state = up;
 			}
-			else if(buttonP == 1)
+			else if(buttonP == 0x01){
 				state = tOff;
-			else
+			}
+			else{
 				state = cOn;
+			}
 			break;
 		case up:
 			state = wUp;
 			break;
-		case wUp;
-			if(buttonP == 2)
+		case wUp:
+			if(buttonP == 0x02)
 				state = wUp;
 			else
 				state = cOn;
@@ -92,7 +103,7 @@ void sound_state(){
 			state = wDown;
 			break;
 		case wDown:
-			if(buttonP == 4)
+			if(buttonP == 0x04)
 				state = wDown;
 			else 
 				state = cOn;
@@ -101,6 +112,7 @@ void sound_state(){
 	switch(state){
 		case off:
 			PWM_off();
+			PORTB = 0x00;
 			break;
 		case tOff:
 			break;
@@ -108,11 +120,12 @@ void sound_state(){
 			PWM_on();
 			break;
 		case cOn:
+			PORTB = 0x01;
 			break;
 		case up:
 			set_PWM(notes[i]);
 			break;
-		case wUp;
+		case wUp:
 			break;
 		case down:
 			set_PWM(notes[i]);

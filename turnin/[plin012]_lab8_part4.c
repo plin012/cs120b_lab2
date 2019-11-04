@@ -8,7 +8,7 @@
  *	code, is my own original work.
  */
 #include <avr/io.h>
-#incllude <avr/interrupt.h>
+#include <avr/interrupt.h>
 
 void ADC_init(){
 	ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADATE);
